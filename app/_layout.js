@@ -3,20 +3,26 @@
 import "../global.css";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
-// NOTE : les providers Auth/Cart/Order seront ajoutés ici dès que
-// context/AuthContext.js, context/CartContext.js et context/OrderContext.js
-// seront créés (prochaine étape). Pour l'instant, layout minimal pour
-// vérifier que le projet démarre correctement avec expo-router + nativewind.
+import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
+import { OrderProvider } from "@/context/OrderContext";
+import Header from "@/components/layouts/Header";
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
+      <AuthProvider>
+        <CartProvider>
+          <OrderProvider>
+            <Header />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            />
+          </OrderProvider>
+        </CartProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
