@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ScrollView, ActivityIndicator, View } from "react-native";
 import Hero from "@/components/home/Hero";
+import HomeContent from "@/components/home/HomeContent";
 
 /**
  * Récupère les données de la page d'accueil.
@@ -12,8 +13,12 @@ async function getHomePageData() {
   try {
     const apiUrl = `${process.env.EXPO_PUBLIC_API_URL}/api/v1/homepage`;
 
+    // CORRECTIF (adaptation) : 5s (valeur du fichier web, où le fetch tourne
+    // côté serveur Next.js, souvent "chaud") est trop court ici — l'app
+    // mobile part toujours à froid contre l'API Vercel. Même ajustement que
+    // CartContext (15s).
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     const res = await fetch(apiUrl, { signal: controller.signal });
     clearTimeout(timeoutId);
@@ -23,7 +28,7 @@ async function getHomePageData() {
       return {
         success: false,
         message: "Erreur lors de la récupération des données",
-        data: null,
+        data: { sections: [] },
       };
     }
 
@@ -34,7 +39,7 @@ async function getHomePageData() {
       return {
         success: false,
         message: responseBody.message || "Réponse API invalide",
-        data: null,
+        data: { sections: [] },
       };
     }
 
@@ -45,11 +50,11 @@ async function getHomePageData() {
     };
   } catch (error) {
     if (error.name === "AbortError") {
-      console.error("Request timeout after 5 seconds");
+      console.error("Request timeout after 15 seconds");
       return {
         success: false,
         message: "La requête a pris trop de temps",
-        data: null,
+        data: { sections: [] },
       };
     }
 
@@ -57,7 +62,7 @@ async function getHomePageData() {
     return {
       success: false,
       message: "Problème de connexion réseau",
-      data: null,
+      data: { sections: [] },
     };
   }
 }
@@ -92,6 +97,7 @@ export default function Home() {
   return (
     <ScrollView className="flex-1 bg-white">
       <Hero homePageData={homePageData} />
+      <HomeContent />
     </ScrollView>
   );
 }
